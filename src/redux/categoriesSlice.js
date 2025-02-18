@@ -6,7 +6,9 @@ export const fetchCategories = createAsyncThunk(
   async (shopId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/shop-categories?shop_id=${shopId}`
+        `${
+          import.meta.env.VITE_API_URL
+        }/shop-categories/from-shop?shop_id=${shopId}`
       );
       return response.data;
     } catch (error) {
