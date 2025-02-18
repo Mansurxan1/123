@@ -20,7 +20,7 @@ function Header() {
     : t("noBranchSelected");
 
   return (
-    <>
+    <div className="max-w-[450px]">
       <div className="flex mx-auto fixed top-0 right-0 left-0 z-[999] justify-center items-center bg-white rounded-b-lg">
         <div className="max-w-[450px] w-full mx-auto flex items-center p-4 rounded-b-lg gap-2">
           <button
@@ -62,7 +62,7 @@ function Header() {
       <AnimatePresence>
         {isMenuOpen && <Menu onClose={() => setIsMenuOpen(false)} />}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
 
