@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -11,7 +11,7 @@ import { fetchCategories } from "../redux/categoriesSlice";
 import { useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { toggleFavorite } from "../redux/favoritesSlice";
+import CategoryButton from "./CategoryButton";
 
 const Product = () => {
   const { t, i18n } = useTranslation();
@@ -20,14 +20,24 @@ const Product = () => {
   const selectedBranch = useSelector((state) => state.shops.selectedBranch);
   const { categories } = useSelector((state) => state.categories);
   const { products } = useSelector((state) => state.products);
-  const likedProducts = useSelector((state) => state.favorites.likedProducts);
 
-  useEffect(() => {
+  const [favorites, setFavorites] = useState({});
+
+  const fetchData = useCallback(() => {
     if (selectedBranch?.id) {
       dispatch(fetchProducts(selectedBranch.id));
       dispatch(fetchCategories(selectedBranch.id));
     }
   }, [selectedBranch, dispatch]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(
@@ -55,7 +65,14 @@ const Product = () => {
   }, [filteredProducts, categories, i18n.language, t]);
 
   const formatPrice = (price) =>
-    `${Number.parseInt(price).toLocaleString()} ${t("UZS")}`;
+    `${Number(price).toLocaleString("ru-RU")} ${t("UZS")}`;
+
+  const toggleFavorite = (id) => {
+    setFavorites((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   return (
     <div className="max-w-[450px] mx-auto p-2">
@@ -87,17 +104,18 @@ const Product = () => {
                       alt={product[`name_${i18n.language}`]}
                       className="w-full h-[120px] rounded-t-md object-cover"
                     />
+
                     <span
                       className="absolute top-1 right-1 bg-white px-1 border rounded-full cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        dispatch(toggleFavorite(product)); 
+                        toggleFavorite(product.id);
                       }}
                     >
-                      {likedProducts.some((p) => p.id === product.id) ? (
-                        <FavoriteIcon className="!text-red-500 !text-[20px] mb-[2px]" />
+                      {favorites[product.id] ? (
+                        <FavoriteIcon className="!text-red-500 !text-[20px]" />
                       ) : (
-                        <FavoriteBorderIcon className="!text-[20px] mb-[2px]" />
+                        <FavoriteBorderIcon className="!text-[20px]" />
                       )}
                     </span>
                   </div>
@@ -111,16 +129,14 @@ const Product = () => {
                     <span>{formatPrice(product.price)}</span>
                   </p>
 
-                  <p
-                    className="text-sm font-bold flex justify-center bg-blue-600 rounded shadow-lg p-1 mx-2 mb-2 text-gray-500 cursor-pointer"
-                    onClick={() => navigate(`/product/${product.id}`)}
-                  >
+                  <p className="text-sm font-bold flex justify-center bg-blue-600 rounded shadow-lg p-1 mx-2 mb-2 text-gray-500">
                     <FaCartPlus className="text-white text-base" />
                   </p>
                 </div>
               </SwiperSlide>
             ))}
           </Swiper>
+          <CategoryButton />
         </div>
       ))}
     </div>

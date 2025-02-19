@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Search from "../components/Search";
 import { FaAngleDown, FaCartPlus } from "react-icons/fa6";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { useTranslation } from "react-i18next";
 import Product from "../components/Product";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 function ProductDetails() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ function ProductDetails() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     axios
       .get(
         `${import.meta.env.VITE_API_URL}/shop-products/detail?product_id=${id}`
@@ -35,12 +38,6 @@ function ProductDetails() {
         setLoading(false);
       });
   }, [id, t]);
-
-  useEffect(() => {
-    if (quantity === 0) {
-      setSelectedSize(null);
-    }
-  }, [quantity]);
 
   if (loading) {
     return (
@@ -67,7 +64,7 @@ function ProductDetails() {
   const updateCart = (newQuantity) => {
     if (newQuantity < 1) {
       setShowQuantity(false);
-      setSelectedSize(null); // Tanlangan o'lchamni o‘chirish
+      setSelectedSize(null); // ✅ Radio tozalash
       setQuantity(0);
       return;
     }
@@ -99,25 +96,28 @@ function ProductDetails() {
           className="w-full h-96 object-cover"
         />
         <button
-          onClick={toggleFavorite}
-          className={`absolute top-4 right-4 rounded-full p-2 ${
-            favorites.includes(product.id)
-              ? "bg-red-500 text-white"
-              : "bg-gray-200 text-gray-600"
-          }`}
+          className="absolute top-2 right-2 bg-white px-2 py-1 border rounded-full cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite();
+          }}
         >
-          <Heart
-            className={favorites.includes(product.id) ? "fill-current" : ""}
-          />
+          {favorites.includes(product.id) ? (
+            <FavoriteIcon className="!text-red-500 text-[25px]" />
+          ) : (
+            <FavoriteBorderIcon className="text-[25px]" />
+          )}
         </button>
       </div>
 
-      <div className="p-4 rounded-[30px] z-2 bg-white relative">
-        <div className="border-t">
+      <div className="px-4 pt-2 rounded-[30px] z-2 relative -top-5 bg-white relative">
+        <div className="">
           <h2 className="text-xl text-center font-bold">{t("description")}</h2>
-          <p className="flex items-center gap-5 font-bold  font-medium text-base py-1">
+          <p className="flex items-center gap-5 font-bold font-medium text-base py-1">
             {product.volume} {product.unit}
-            <span>{product.price}</span>
+            <span className="text-lg font-medium">
+              {Number(40000).toLocaleString("ru-RU")} {t("UZS")}
+            </span>
           </p>
         </div>
         <p className="text-gray-700">{product[`description_${currentLang}`]}</p>
@@ -128,7 +128,9 @@ function ProductDetails() {
           {product.tips.map((size) => (
             <label
               key={size.id}
-              className="flex items-center justify-between p-3 border rounded-md cursor-pointer transition hover:bg-blue-200 hover:border-blue-500"
+              className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition hover:bg-blue-200 hover:border-blue-500 ${
+                selectedSize?.id === size.id ? "bg-blue-100" : ""
+              }`}
             >
               <div className="flex items-center gap-2">
                 <input
@@ -138,16 +140,18 @@ function ProductDetails() {
                   checked={selectedSize?.id === size.id}
                   onChange={() => {
                     setSelectedSize(size);
-                    setShowQuantity(false);
-                    setQuantity(0);
+                    if (!showQuantity) {
+                      setShowQuantity(false);
+                      setQuantity(0);
+                    }
                   }}
                 />
-                <span className="text-lg">
+                <span className="text-lg font-medium">
                   {size.volume} {size.unit}
                 </span>
               </div>
               <span className="text-lg font-medium">
-                {size.price.toLocaleString()} {t("UZS")}
+                {size.price.toLocaleString("ru-RU")} {t("UZS")}
               </span>
             </label>
           ))}
@@ -161,7 +165,7 @@ function ProductDetails() {
             }}
             className="w-full mt-4 flex items-center justify-center gap-2 p-3 bg-blue-600 text-white rounded-md"
           >
-            <FaCartPlus className="h-5 w-5" /> {t("addToCart")}
+            <FaCartPlus className="h-5 w-5" /> {t("add_to_cart")}
           </button>
         )}
 
@@ -191,12 +195,23 @@ function ProductDetails() {
         )}
 
         {showQuantity && (
-          <button className="w-full mt-4 bg-blue-600 text-white p-3 rounded-md">
-            {t("purchase")}
-          </button>
+          <div className="flex gap-4">
+            <Link
+              to={"/cart"}
+              className="w-full mt-4 text-center bg-blue-600 text-white p-3 rounded-md"
+            >
+              {t("addToCart")}
+            </Link>
+            <Link
+              to={"/purchase"}
+              className="w-full mt-4 text-center bg-blue-600 text-white p-3 rounded-md"
+            >
+              {t("purchase")}
+            </Link>
+          </div>
         )}
       </div>
-      <h2 className="text-center mt-5 font-bold text-xl">{t("allProducts")}</h2>
+      <h2 className="text-center font-bold text-xl">{t("allProducts")}</h2>
       <Product />
     </div>
   );
