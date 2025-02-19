@@ -36,6 +36,12 @@ function ProductDetails() {
       });
   }, [id, t]);
 
+  useEffect(() => {
+    if (quantity === 0) {
+      setSelectedSize(null);
+    }
+  }, [quantity]);
+
   if (loading) {
     return (
       <div className="text-center text-lg font-semibold mt-10">
@@ -61,7 +67,7 @@ function ProductDetails() {
   const updateCart = (newQuantity) => {
     if (newQuantity < 1) {
       setShowQuantity(false);
-      setSelectedSize(null);
+      setSelectedSize(null); // Tanlangan o'lchamni o‘chirish
       setQuantity(0);
       return;
     }
@@ -163,7 +169,7 @@ function ProductDetails() {
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
+                onClick={() => updateCart(quantity - 1)}
                 className="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500"
               >
                 <AiOutlineMinus size={16} />
@@ -172,7 +178,7 @@ function ProductDetails() {
                 {quantity}
               </span>
               <button
-                onClick={() => setQuantity((prev) => prev + 1)}
+                onClick={() => updateCart(quantity + 1)}
                 className="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500"
               >
                 <AiOutlinePlus size={16} />
