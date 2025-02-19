@@ -98,9 +98,9 @@ const Categories = () => {
                   alt={cat[`name_${i18n.language}`]}
                   className="w-full h-[80px] rounded-md border object-cover shadow-md"
                 />
-                <p className="text-xs mt-1 font-medium capitalize">
+                <h3 className="text-xs mt-1 px-2 font-medium capitalize line-clamp-2">
                   {cat[`name_${i18n.language}`]}
-                </p>
+                </h3>
               </div>
             </SwiperSlide>
           ))}

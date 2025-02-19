@@ -6,9 +6,7 @@ export const fetchProducts = createAsyncThunk(
   async (branchId, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_API_URL
-        }/shop-products/from-shop?shop_id=${branchId}`
+        `${import.meta.env.VITE_API_URL}/shop-products/?shop_id=${branchId}`
       );
       return response.data;
     } catch (error) {

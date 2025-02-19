@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { setSelectedBranch } from "../redux/shopSlice";
 import { useTranslation } from "react-i18next";
 import { FaAngleDown, FaLocationDot } from "react-icons/fa6";
-import Search from "../components/Search";
 
 function Branches() {
   const dispatch = useDispatch();
@@ -28,8 +27,7 @@ function Branches() {
   };
 
   return (
-    <div className="">
-      <Search />
+    <div className="mt-[80px]">
       <div className="flex items-center text-center gap-3 mb-4 rounded-bl-[20px] rounded-br-[20px] border-b-[2px] border-b-[#00000050] px-3 pb-4">
         <button
           onClick={() => navigate(-1)}

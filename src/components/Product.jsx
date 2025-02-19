@@ -1,47 +1,47 @@
-import React, { useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
 import { FreeMode } from "swiper/modules";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
+import { FaCartPlus } from "react-icons/fa";
 import { fetchProducts } from "../redux/productSlice";
 import { fetchCategories } from "../redux/categoriesSlice";
+import { useNavigate } from "react-router-dom";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 const Product = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedBranch = useSelector((state) => state.shops.selectedBranch);
   const { categories } = useSelector((state) => state.categories);
   const { products } = useSelector((state) => state.products);
 
-  // 🔹 API'dan mahsulotlarni olish
-  const fetchData = useCallback(() => {
+  const [favorites, setFavorites] = useState({});
+
+  const toggleFavorite = (productId) => {
+    setFavorites((prev) => ({
+      ...prev,
+      [productId]: !prev[productId],
+    }));
+  };
+
+  useEffect(() => {
     if (selectedBranch?.id) {
       dispatch(fetchProducts(selectedBranch.id));
       dispatch(fetchCategories(selectedBranch.id));
     }
   }, [selectedBranch, dispatch]);
 
-  // 🔹 Sahifa yuklanganda ma'lumotlarni olish
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // 🔹 Har 10 soniyada ma'lumotlarni yangilash
-  useEffect(() => {
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, [fetchData]);
-
-  // 🔹 Tanlangan filial mahsulotlarini filter qilish (faqat active mahsulotlar)
   const filteredProducts = useMemo(() => {
     return products.filter(
       (product) => product.shop_id === selectedBranch?.id && product.is_active
     );
   }, [products, selectedBranch]);
 
-  // 🔹 Mahsulotlarni kategoriyalar bo'yicha guruhlash
   const groupedByCategory = useMemo(() => {
     return filteredProducts.reduce((acc, product) => {
       const category = categories.find((cat) => cat.id === product.category_id);
@@ -61,7 +61,6 @@ const Product = () => {
     }, {});
   }, [filteredProducts, categories, i18n.language, t]);
 
-  // 🔹 Narxlarni formatlash
   const formatPrice = (price) =>
     `${Number.parseInt(price).toLocaleString()} ${t("UZS")}`;
 
@@ -85,17 +84,45 @@ const Product = () => {
           >
             {products.map((product) => (
               <SwiperSlide key={product.id}>
-                <div className="cursor-pointer mr-3 flex flex-col items-center text-center">
-                  <img
-                    src={`${import.meta.env.VITE_API_URL}/${product.photo}`}
-                    alt={product[`name_${i18n.language}`]}
-                    className="w-full h-[120px] rounded-md border object-cover shadow-md"
-                  />
-                  <p className="text-xs mt-1 font-medium capitalize">
+                <div
+                  className="cursor-pointer mb-2 flex flex-col border rounded-md shadow-lg text-center relative"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
+                  <div className="relative">
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}/${product.photo}`}
+                      alt={product[`name_${i18n.language}`]}
+                      className="w-full h-[120px] rounded-t-md object-cover"
+                    />
+                    <span
+                      className="absolute top-1 right-1 bg-white px-1 border rounded-full cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Sahifa o‘tishini to‘xtatish
+                        toggleFavorite(product.id);
+                      }}
+                    >
+                      {favorites[product.id] ? (
+                        <FavoriteIcon className="!text-red-500 !text-[20px] mb-[2px]" />
+                      ) : (
+                        <FavoriteBorderIcon className="!text-[20px] mb-[2px]" />
+                      )}
+                    </span>
+                  </div>
+
+                  <h3 className="text-sm px-2 font-medium capitalize truncate">
                     {product[`name_${i18n.language}`]}
+                  </h3>
+
+                  <p className="flex items-center justify-between font-medium text-xs py-1 mx-2">
+                    {product.volume} {product.unit}
+                    <span>{formatPrice(product.price)}</span>
                   </p>
-                  <p className="text-sm text-gray-500">
-                    {formatPrice(product.price)}
+
+                  <p
+                    className="text-sm font-bold flex justify-center bg-blue-600 rounded shadow-lg p-1 mx-2 mb-2 text-gray-500 cursor-pointer"
+                    onClick={() => navigate(`/product/${product.id}`)}
+                  >
+                    <FaCartPlus className="text-white text-base" />
                   </p>
                 </div>
               </SwiperSlide>

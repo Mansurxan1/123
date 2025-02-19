@@ -7,6 +7,8 @@ import Branches from "../pages/Branches";
 import CategoryProducts from "../pages/CategoryProducts";
 import CategoryAll from "../pages/CategoryAll";
 import ProductDetails from "../pages/ProductDetails";
+import LocationPage from "../pages/Location";
+import SearchResults from "../pages/SearchResults";
 
 const AppRouter = () => {
   return (
@@ -19,9 +21,10 @@ const AppRouter = () => {
         {/* <Route path="/likes" element={<LikesPage />} /> */}
         {/* <Route path="/cart" element={<CartPage />} /> */}
         <Route path="/product/:id" element={<ProductDetails />} />
-        {/* <Route path="/locations" element={<LocationPage />} /> */}
+        <Route path="/locations" element={<LocationPage />} />
         <Route path="/category-all" element={<CategoryAll />} />
         <Route path="/category/:categoryId" element={<CategoryProducts />} />
+        <Route path="/search-results" element={<SearchResults />} />
         {/* <Route path="/orders" element={<Orders />} /> */}
       </Routes>
     </Router>
