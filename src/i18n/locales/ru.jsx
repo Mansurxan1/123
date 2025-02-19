@@ -25,7 +25,7 @@ const ru = {
     confirm: "Подтвердить",
     cancel: "Отмена",
     noBranchSelected: "Выберите свой адрес...",
-    no_categories_found: "Категории Недоступны",
+    no_categories_found: "Категории и товары не найдены",
     branches: "Филиалы",
     select_branch: "Нет доступных филиалов",
     price_per_kg: "Цена за 1 кг",
@@ -35,6 +35,11 @@ const ru = {
     product_not_found: "Товар не найден",
     modalBranch:
       "Пожалуйста, выберите филиал для продолжения оформления заказа.",
+    description: "Описание",
+    productSize: "Размер продукта",
+    addToCart: "Добавить в корзину",
+    allProducts: "Все Tовары",
+    closed: "Закрыто",
   },
 };
 

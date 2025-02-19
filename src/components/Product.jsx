@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -11,6 +11,7 @@ import { fetchCategories } from "../redux/categoriesSlice";
 import { useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { toggleFavorite } from "../redux/favoritesSlice";
 
 const Product = () => {
   const { t, i18n } = useTranslation();
@@ -19,15 +20,7 @@ const Product = () => {
   const selectedBranch = useSelector((state) => state.shops.selectedBranch);
   const { categories } = useSelector((state) => state.categories);
   const { products } = useSelector((state) => state.products);
-
-  const [favorites, setFavorites] = useState({});
-
-  const toggleFavorite = (productId) => {
-    setFavorites((prev) => ({
-      ...prev,
-      [productId]: !prev[productId],
-    }));
-  };
+  const likedProducts = useSelector((state) => state.favorites.likedProducts);
 
   useEffect(() => {
     if (selectedBranch?.id) {
@@ -97,11 +90,11 @@ const Product = () => {
                     <span
                       className="absolute top-1 right-1 bg-white px-1 border rounded-full cursor-pointer"
                       onClick={(e) => {
-                        e.stopPropagation(); // Sahifa o‘tishini to‘xtatish
-                        toggleFavorite(product.id);
+                        e.stopPropagation();
+                        dispatch(toggleFavorite(product)); 
                       }}
                     >
-                      {favorites[product.id] ? (
+                      {likedProducts.some((p) => p.id === product.id) ? (
                         <FavoriteIcon className="!text-red-500 !text-[20px] mb-[2px]" />
                       ) : (
                         <FavoriteBorderIcon className="!text-[20px] mb-[2px]" />

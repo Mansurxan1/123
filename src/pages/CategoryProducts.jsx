@@ -1,145 +1,200 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
-import { fetchProducts } from "../redux/productSlice";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Heart } from "lucide-react";
+import axios from "axios";
 import { useTranslation } from "react-i18next";
-import Search from "../components/Search";
-import { FaAngleDown, FaCartPlus } from "react-icons/fa";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
+import { FaAngleDown, FaCartPlus } from "react-icons/fa6";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 
-const CategoryProducts = () => {
-  const { t, i18n } = useTranslation();
-  const { categoryId } = useParams();
+function ProductDetails() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.categories);
-  const { products, loading, error, status } = useSelector(
-    (state) => state.products
-  );
+  const { id } = useParams();
+  const { t, i18n } = useTranslation();
 
-  // Mahsulotlarni sevimlilarga qo'shish uchun state
-  const [favorites, setFavorites] = useState({});
+  const [product, setProduct] = useState(null);
+  const [favorites, setFavorites] = useState([]);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [quantity, setQuantity] = useState(0);
+  const [showQuantity, setShowQuantity] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchProduct = () => {
+    axios
+      .get(
+        `${import.meta.env.VITE_API_URL}/shop-products/detail?product_id=${id}`
+      )
+      .then((response) => {
+        setProduct(response.data.product);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(t("notFound"));
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
-    AOS.init();
-    window.scrollTo(0, 0);
-  }, []);
+    fetchProduct();
+    const interval = setInterval(fetchProduct, 10000); // har 10 soniyada ma'lumotni yangilash
+    return () => clearInterval(interval);
+  }, [id, t]);
 
-  useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchProducts());
+  if (loading) {
+    return (
+      <div className="text-center text-lg font-semibold mt-10">
+        {t("loading")}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-lg font-semibold mt-10">{error}</div>
+    );
+  }
+
+  const toggleFavorite = () => {
+    setFavorites((prev) =>
+      prev.includes(product.id)
+        ? prev.filter((favId) => favId !== product.id)
+        : [...prev, product.id]
+    );
+  };
+
+  const updateCart = (newQuantity) => {
+    if (newQuantity < 1) {
+      setShowQuantity(false);
+      setSelectedSize(null);
+      setQuantity(0);
+      return;
     }
-  }, [dispatch, status]);
-
-  if (loading) return <p>{t("loading")}</p>;
-  if (error) return <p>{t("error_loading_products")}</p>;
-
-  const selectedCategory = categories.find(
-    (cat) => cat.id === parseInt(categoryId)
-  );
-
-  const filteredProducts = products.filter(
-    (product) => product.category_id === parseInt(categoryId)
-  );
-
-  // Sevimlilarga qo'shish/tanlash funksiyasi
-  const toggleFavorite = (productId) => {
-    setFavorites((prevFavorites) => ({
-      ...prevFavorites,
-      [productId]: !prevFavorites[productId],
-    }));
+    setQuantity(newQuantity);
   };
 
-  // Narxni formatlash funksiyasi
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat(i18n.language === "uz" ? "uz-UZ" : "en-US", {
-      style: "currency",
-      currency: "UZS",
-    }).format(price);
-  };
+  const totalPrice = (selectedSize?.price || 0) * quantity;
+  const currentLang = i18n.language;
 
   return (
-    <div className="max-w-[450px] mx-auto">
-      <Search />
-      <div
-        className="flex items-center text-center gap-3 mb-4 rounded-bl-[20px] rounded-br-[20px] border-b-[2px] border-b-[#00000050] px-3 pb-4"
-        data-aos="fade-down"
-      >
+    <div className="bg-white">
+      <div className="flex items-center text-center gap-3 mb-4 rounded-bl-[20px] rounded-br-[20px] border-b-[2px] border-b-[#00000050] px-3 pb-4">
         <button
           onClick={() => navigate(-1)}
-          className="p-2 bg-white border-[1px] z-10 rounded-lg shadow-[0px_4px_4px_rgba(0,0,0,0.3)]"
+          className="p-2 bg-white border-[1px] rounded-lg absolute shadow-[0px_4px_4px_rgba(0,0,0,0.3)]"
         >
           <FaAngleDown className="text-2xl rotate-90" />
         </button>
-        <h2 className="text-2xl w-full mx-auto font-semibold max-w-[300px]">
-          {selectedCategory?.[`name_${i18n.language}`] || t("category")}
-        </h2>
+        <h1 className="text-2xl w-full font-semibold">
+          {product[`name_${currentLang}`]}
+        </h1>
       </div>
 
-      <div className="grid grid-cols-2 px-4 gap-4">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="cursor-pointer mb-2 flex flex-col border rounded-md shadow-lg text-center relative"
-              data-aos="fade-up"
-              data-aos-duration="1000"
-              onClick={() => navigate(`/product/${product.id}`)}
+      <div className="sticky top-0">
+        <img
+          src={`${import.meta.env.VITE_API_URL}/${product.photo}`}
+          alt={product[`name_${currentLang}`]}
+          className="w-full h-96 object-cover"
+        />
+        <button
+          onClick={toggleFavorite}
+          className={`absolute top-4 right-4 rounded-full p-2 ${
+            favorites.includes(product.id)
+              ? "bg-red-500 text-white"
+              : "bg-gray-200 text-gray-600"
+          }`}
+        >
+          <Heart
+            className={favorites.includes(product.id) ? "fill-current" : ""}
+          />
+        </button>
+      </div>
+
+      <div className="p-4 rounded-[30px] z-2 bg-white relative">
+        <div className="border-t">
+          <h2 className="text-xl text-center font-bold">{t("description")}</h2>
+          <p className="flex items-center gap-5 font-bold font-medium text-base py-1">
+            {product.volume} {product.unit}
+            <span>{product.price}</span>
+          </p>
+        </div>
+        <p className="text-gray-700">{product[`description_${currentLang}`]}</p>
+        <h3 className="text-xl text-center font-bold mt-3">
+          {t("productSize")}:
+        </h3>
+        <div className="mt-2 space-y-2">
+          {product.tips.map((size) => (
+            <label
+              key={size.id}
+              className="flex items-center justify-between p-3 border rounded-md cursor-pointer transition hover:bg-blue-200 hover:border-blue-500"
             >
-              <div className="relative">
-                <img
-                  src={`${import.meta.env.VITE_API_URL}/${product.photo}`}
-                  alt={product[`name_${i18n.language}`]}
-                  className="w-full h-[120px] rounded-t-md object-cover"
-                />
-                <span
-                  className="absolute top-1 right-1 bg-white px-1 border rounded-full cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(product.id);
+              <div className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="size"
+                  className="w-5 h-5 accent-blue-600"
+                  checked={selectedSize?.id === size.id}
+                  onChange={() => {
+                    setSelectedSize(size);
+                    setShowQuantity(false);
+                    setQuantity(0);
                   }}
-                >
-                  {favorites[product.id] ? (
-                    <FavoriteIcon className="!text-red-500 !text-[20px] mb-[2px]" />
-                  ) : (
-                    <FavoriteBorderIcon className="!text-[20px] mb-[2px]" />
-                  )}
+                />
+                <span className="text-lg">
+                  {size.volume} {size.unit}
                 </span>
               </div>
+              <span className="text-lg font-medium">
+                {size.price.toLocaleString()} {t("UZS")}
+              </span>
+            </label>
+          ))}
+        </div>
 
-              <h3 className="text-sm px-2 font-medium capitalize truncate">
-                {product[`name_${i18n.language}`]}
-              </h3>
+        {selectedSize && !showQuantity && (
+          <button
+            onClick={() => {
+              setShowQuantity(true);
+              setQuantity(1);
+            }}
+            className="w-full mt-4 flex items-center justify-center gap-2 p-3 bg-blue-600 text-white rounded-md"
+          >
+            <FaCartPlus className="h-5 w-5" /> {t("addToCart")}
+          </button>
+        )}
 
-              <p className="flex items-center justify-between font-medium text-xs py-1 mx-2">
-                {product.volume} {product.unit}
-                <span>{formatPrice(product.price)}</span>
-              </p>
-
-              <p
-                className="text-sm font-bold flex justify-center bg-blue-600 rounded shadow-lg p-1 mx-2 mb-2 text-gray-500 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/product/${product.id}`);
-                }}
+        {showQuantity && (
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
+                className="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500"
               >
-                <FaCartPlus className="text-white text-base" />
-              </p>
+                <AiOutlineMinus size={16} />
+              </button>
+              <span className="text-lg font-medium w-4 text-center">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity((prev) => prev + 1)}
+                className="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500"
+              >
+                <AiOutlinePlus size={16} />
+              </button>
             </div>
-          ))
-        ) : (
-          <div className="flex justify-center col-span-2 items-center w-full h-80 rounded-lg shadow-lg mt-4">
-            <p className="text-gray-500 text-center">
-              {t("no_products_found")}
+            <p className="text-lg font-semibold">
+              {t("price")}: {totalPrice.toLocaleString()} so‘m
             </p>
           </div>
+        )}
+
+        {showQuantity && (
+          <button className="w-full mt-4 bg-blue-600 text-white p-3 rounded-md">
+            {t("purchase")}
+          </button>
         )}
       </div>
     </div>
   );
-};
+}
 
-export default CategoryProducts;
+export default ProductDetails;

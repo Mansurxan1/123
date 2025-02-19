@@ -83,7 +83,7 @@ const CategoryAll = () => {
           <FaAngleDown className="text-2xl rotate-90" />
         </button>
         <h2
-          className="text-2xl w-full mx-auto font-semibold max-w-[300px]"
+          className="text-2xl w-full mx-auto capitalize font-semibold max-w-[300px]"
           data-aos=""
         >
           {t("all_categories")}

@@ -36,9 +36,18 @@ const Categories = () => {
           console.log(
             "API ma'lumotlari o'zgardi. localStorage va UI yangilanmoqda..."
           );
-          localStorage.setItem("categories", JSON.stringify(newCategories));
-          setLocalCategories(newCategories);
-          prevCategoriesRef.current = newCategories;
+
+          // Eng yangi ma'lumotlarni birinchiga qo'shish
+          const updatedCategories = [
+            ...newCategories.filter(
+              (cat) => !prevCategories.some((prev) => prev.id === cat.id)
+            ),
+            ...prevCategories,
+          ];
+
+          localStorage.setItem("categories", JSON.stringify(updatedCategories));
+          setLocalCategories(updatedCategories);
+          prevCategoriesRef.current = updatedCategories;
         } else {
           console.log(
             "API ma'lumotlari o'zgarmadi. Hech narsa o'zgartirilmaydi."
@@ -106,7 +115,9 @@ const Categories = () => {
           ))}
         </Swiper>
       ) : (
-        <div className="text-center">{t("no_categories_found")}</div>
+        <div className="text-center capitalize font-medium text-gray-500">
+          {t("no_categories_found")}
+        </div>
       )}
     </div>
   );
