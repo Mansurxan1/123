@@ -9,7 +9,7 @@ const CategoryButton = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsVisible(window.scrollY > 310);
+      setIsVisible(window.scrollY > 500);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -20,19 +20,19 @@ const CategoryButton = () => {
     setTimeout(() => {
       navigate("/category-all");
       setIsRotating(false);
-    }, 1000);
+    }, 800);
   };
 
   return (
     <>
       <button
         onClick={handleClick}
-        className={`fixed z-[999] bottom-16 right-5 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transition-transform ${
+        className={`fixed z-[999] bottom-32 right-5 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transition-transform ${
           isVisible ? "opacity-100 animate-bounce" : "opacity-0"
         }`}
         style={{
-          transition: "opacity 0.5s ease",
-          animation: isVisible ? "shake 2s infinite" : "none",
+          transition: "opacity 0.3s",
+          animation: isVisible ? "1s infinite" : "none",
         }}
       >
         <BiCategory
@@ -50,7 +50,7 @@ const CategoryButton = () => {
           }
 
           .rotate-animation {
-            animation: rotate 1s linear infinite;
+            animation: rotate 0.5s linear infinite;
           }
         `}
       </style>

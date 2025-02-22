@@ -40,6 +40,7 @@ const ru = {
     addToCart: "Перейти в корзину",
     allProducts: "Все Tовары",
     closed: "Закрыто",
+    no_liked_products: "Избранные товары не найдены",
   },
 };
 

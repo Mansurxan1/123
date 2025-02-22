@@ -124,13 +124,14 @@ const Product = () => {
                     {product[`name_${i18n.language}`]}
                   </h3>
 
-                  <p className="flex items-center justify-between font-medium text-xs py-1 mx-2">
+                  <p className="flex items-center my-2 justify-between font-medium text-xs py-1 mx-2">
                     {product.volume} {product.unit}
                     <span>{formatPrice(product.price)}</span>
+                    <FaCartPlus className="text-blue-600 text-base" />
                   </p>
-
-                  <p className="text-sm font-bold flex justify-center bg-blue-600 rounded shadow-lg p-1 mx-2 mb-2 text-gray-500">
-                    <FaCartPlus className="text-white text-base" />
+                  <p className="flex hidden items-center my-2 justify-between font-medium text-xs py-1 mx-2">
+                    {product.volume} {product.unit}
+                    <span>{formatPrice(product.price)}</span>
                   </p>
                 </div>
               </SwiperSlide>

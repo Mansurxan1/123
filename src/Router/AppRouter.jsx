@@ -9,8 +9,9 @@ import CategoryAll from "../pages/CategoryAll";
 import ProductDetails from "../pages/ProductDetails";
 import LocationPage from "../pages/Location";
 import SearchResults from "../pages/SearchResults";
-import LikesPage from "../pages/LikePage"
+import LikesPage from "../pages/LikePage";
 import Orders from "../pages/Orders";
+import CartPage from "../pages/CartPage";
 
 const AppRouter = () => {
   return (
@@ -21,7 +22,7 @@ const AppRouter = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/branches" element={<Branches />} />
         <Route path="/likes" element={<LikesPage />} />
-        {/* <Route path="/cart" element={<CartPage />} /> */}
+        <Route path="/cart" element={<CartPage />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/locations" element={<LocationPage />} />
         <Route path="/category-all" element={<CategoryAll />} />

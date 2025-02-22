@@ -111,7 +111,7 @@ const LocationPage = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] px-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div className="bg-white p-6 rounded-2xl shadow-lg max-w-96 text-center">
             <div className="flex items-center justify-center w-24 h-24 mx-auto bg-gray-100 rounded-full border-2">
               <IoMdInformationCircle className="text-6xl text-red-600" />

@@ -37,6 +37,7 @@ const uz = {
     addToCart: "Savatga o'tish",
     allProducts: "Barcha Mahsulotlar",
     closed: "Yopiq",
+    no_liked_products: "Sevimli mahsulotlar topilmadi",
   },
 };
 

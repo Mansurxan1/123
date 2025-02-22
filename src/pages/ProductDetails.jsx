@@ -64,7 +64,7 @@ function ProductDetails() {
   const updateCart = (newQuantity) => {
     if (newQuantity < 1) {
       setShowQuantity(false);
-      setSelectedSize(null); // ✅ Radio tozalash
+      setSelectedSize(null);
       setQuantity(0);
       return;
     }
@@ -174,18 +174,18 @@ function ProductDetails() {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => updateCart(quantity - 1)}
-                className="w-8 h-8 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500"
+                className="w-10 h-10 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 text-xl font-bold transition-all hover:bg-red-500 hover:text-white active:scale-90"
               >
-                <AiOutlineMinus size={16} />
+                <AiOutlineMinus size={20} />
               </button>
-              <span className="text-lg font-medium w-4 text-center">
+              <span className="text-lg font-medium w-6 text-center">
                 {quantity}
               </span>
               <button
                 onClick={() => updateCart(quantity + 1)}
-                className="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500"
+                className="w-10 h-10 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 text-xl font-bold transition-all hover:bg-green-500 hover:text-white active:scale-90"
               >
-                <AiOutlinePlus size={16} />
+                <AiOutlinePlus size={20} />
               </button>
             </div>
             <p className="text-lg font-semibold">
