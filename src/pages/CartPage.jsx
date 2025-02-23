@@ -3,6 +3,10 @@ import axios from "axios";
 import { FaTrash } from "react-icons/fa";
 import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
 import { useSwipeable } from "react-swipeable";
+import Search from "../components/Search";
+import { FaAngleDown } from "react-icons/fa6";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const CartItem = ({ item, updateQuantity, removeItem }) => {
   const [offset, setOffset] = useState(0);
@@ -103,6 +107,8 @@ const CartItem = ({ item, updateQuantity, removeItem }) => {
 
 const CartPage = () => {
   const [cartItems, setCartItems] = useState([]);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const fetchCartItems = async () => {
     try {
@@ -143,7 +149,6 @@ const CartPage = () => {
       console.log("✅ PATCH muvaffaqiyatli bajarildi!");
     } catch (error) {
       console.error("❌ PATCH xatolik:", error);
-      // API xatolik bersa, eski son qayta tiklanadi
       fetchCartItems();
     }
   }, []);
@@ -162,14 +167,30 @@ const CartPage = () => {
         console.log("✅ Mahsulot muvaffaqiyatli o‘chirildi!");
       } catch (error) {
         console.error("❌ DELETE xatolik:", error);
-        setCartItems(oldCartItems); // API xatolik bersa, mahsulotni qayta tiklash
+        setCartItems(oldCartItems);
       }
     },
     [cartItems]
   );
 
+  const sendToOrders = () => {
+    navigate("/order", { state: { cartItems } });
+  };
+
   return (
-    <div className="max-w-[450px] mt-[80px] mx-auto p-2">
+    <div className="max-w-[450px] mx-auto">
+      <Search />
+      <div className="flex items-center text-center gap-3 mb-4 rounded-bl-[20px] rounded-br-[20px] border-b-[2px] border-b-[#00000050] px-4 pb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 bg-white border-[1px] z-10 rounded-lg shadow-[0px_4px_4px_rgba(0,0,0,0.3)]"
+        >
+          <FaAngleDown className="text-2xl rotate-90" />
+        </button>
+        <h2 className="text-2xl w-full mx-auto capitalize font-semibold max-w-[300px]">
+          {t("cart")}
+        </h2>
+      </div>
       {cartItems.length > 0 ? (
         cartItems.map((item) => (
           <CartItem
@@ -177,10 +198,19 @@ const CartPage = () => {
             item={item}
             updateQuantity={updateQuantity}
             removeItem={removeItem}
+            className="p-4"
           />
         ))
       ) : (
-        <p className="text-center text-gray-500">Savatingiz bo'sh</p>
+        <p className="text-center text-gray-500">{t("notcart")}</p>
+      )}
+      {cartItems.length > 0 && (
+        <button
+          onClick={sendToOrders}
+          className="w-full bg-blue-500 text-white py-2 rounded-lg mt-4 font-semibold"
+        >
+          {t("sendToOrders")}
+        </button>
       )}
     </div>
   );

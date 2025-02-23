@@ -38,6 +38,9 @@ const uz = {
     allProducts: "Barcha Mahsulotlar",
     closed: "Yopiq",
     no_liked_products: "Sevimli mahsulotlar topilmadi",
+    search_results: "Qidiruv natijalari",
+    no_results_found: "Siz qidirgan mahsulot topilmadi",
+    notcart: "Siz savatga mahsulotlarini qo'shmagansiz",
   },
 };
 

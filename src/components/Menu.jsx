@@ -59,7 +59,7 @@ const Menu = ({ onClose }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0, opacity: 0 }}
         transition={{ type: "spring", duration: 0.5 }}
-        className="fixed top-0 z-[9999] w-full max-w-[450px] bg-white min-h-screen max-h-screen overflow-y-auto p-4 scrollbar-hide"
+        className="fixed top-0 z-[9999] w-full max-w-[450px] bg-white min-h-screen overflow-y-auto p-4 scrollbar-hide"
       >
         <div className="relative flex flex-col items-center mb-6">
           <Link to={"/"} onClick={onClose}>
@@ -74,11 +74,11 @@ const Menu = ({ onClose }) => {
           </button>
         </div>
 
-        <nav className="flex flex-col items-start space-y-1 font-semibold">
+        <nav className="flex flex-col items-start font-semibold">
           <Link
             to="/"
             onClick={onClose}
-            className="flex items-center text-lg gap-3 p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <FcHome className="text-xl" />
             <span>{t("home")}</span>
@@ -86,7 +86,7 @@ const Menu = ({ onClose }) => {
           <Link
             to="/profile"
             onClick={onClose}
-            className="flex items-center text-lg gap-3 p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <FaUser className="text-blue-600 text-xl" />
             <span>{t("profile")}</span>
@@ -94,7 +94,7 @@ const Menu = ({ onClose }) => {
           <Link
             to="/cart"
             onClick={onClose}
-            className="flex items-center gap-3 p-2 text-lg  hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center gap-3 px-2 text-lg py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <FiShoppingCart className="text-blue-600 text-xl" />
             <span>{t("cart")}</span>
@@ -102,7 +102,7 @@ const Menu = ({ onClose }) => {
           <Link
             to="/orders"
             onClick={onClose}
-            className="flex items-center gap-3 text-lg p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center gap-3 text-lg px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <LuShoppingBasket className="text-blue-600 text-xl" />
             <span>{t("orders")}</span>
@@ -110,7 +110,7 @@ const Menu = ({ onClose }) => {
           <Link
             to="/likes"
             onClick={onClose}
-            className="flex items-center text-lg gap-3 p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <FcLike className="text-xl" />
             <span>{t("favorites")}</span>
@@ -118,7 +118,7 @@ const Menu = ({ onClose }) => {
           <Link
             to="/locations"
             onClick={onClose}
-            className="flex items-center text-lg gap-3 p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <FaMapLocationDot className="text-blue-500 text-xl" />
             <span>{t("locations")}</span>
@@ -126,17 +126,17 @@ const Menu = ({ onClose }) => {
           <a
             href="tel:+998901234567"
             onClick={onClose}
-            className="flex items-center gap-3 text-lg p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center gap-3 text-lg px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
             <LuPhoneCall className="text-blue-600 text-xl" />
             <span>{t("contact")}</span>
           </a>
         </nav>
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-2">
           <button
             onClick={() => changeLanguage("uz")}
-            className={`px-4 py-2 rounded-xl shadow-2xl ${
+            className={`px-4 py-1 rounded-xl shadow-2xl ${
               selectedLanguage === "uz" ? "bg-blue-600 text-white" : "border-2"
             }`}
           >
@@ -144,7 +144,7 @@ const Menu = ({ onClose }) => {
           </button>
           <button
             onClick={() => changeLanguage("ru")}
-            className={`px-4 py-2 rounded-lg shadow-2xl ${
+            className={`px-4 py-1 rounded-lg shadow-2xl ${
               selectedLanguage === "ru" ? "bg-blue-600 text-white" : "border-2"
             }`}
           >

@@ -12,6 +12,7 @@ import SearchResults from "../pages/SearchResults";
 import LikesPage from "../pages/LikePage";
 import Orders from "../pages/Orders";
 import CartPage from "../pages/CartPage";
+import Order from "../pages/Order";
 
 const AppRouter = () => {
   return (
@@ -29,6 +30,7 @@ const AppRouter = () => {
         <Route path="/category/:categoryId" element={<CategoryProducts />} />
         <Route path="/search-results" element={<SearchResults />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/order" element={<Order />} />
       </Routes>
     </Router>
   );

@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Search from "../components/Search";
-import { FaAngleDown, FaCartPlus } from "react-icons/fa6";
-import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { FaAngleDown } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
-import Product from "../components/Product";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { Link } from "react-router-dom";
+import { Loader } from "lucide-react";
 
 function ProductDetails() {
   const navigate = useNavigate();
@@ -20,29 +23,163 @@ function ProductDetails() {
   const [quantity, setQuantity] = useState(0);
   const [showQuantity, setShowQuantity] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [cartLoading, setCartLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cartId, setCartId] = useState(null);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  // Reset all states
+  const resetAllStates = useCallback(() => {
+    setProduct(null);
+    setSelectedSize(null);
+    setQuantity(0);
+    setShowQuantity(false);
+    setCartId(null);
+    setError(null);
+  }, []);
 
-    axios
-      .get(
+  // Fetch product details
+  const fetchProductDetails = useCallback(async () => {
+    try {
+      const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/shop-products/detail?product_id=${id}`
-      )
-      .then((response) => {
-        setProduct(response.data.product);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(t("notFound"));
-        setLoading(false);
-      });
+      );
+      setProduct(response.data.product);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      setError(t("notFound"));
+    }
   }, [id, t]);
 
-  if (loading) {
+  // Check cart data
+  const checkCartData = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_CARTS}?product_id=${id}`
+      );
+      const cartData = response.data;
+
+      // Cart bo'sh bo'lmasa va massiv bo'lsa
+      if (Array.isArray(cartData) && cartData.length > 0) {
+        // Joriy mahsulot ID si bilan cart dagi mahsulotlarni tekshirish
+        const currentProductInCart = cartData.find(
+          (item) => item.product_id === Number(id)
+        );
+
+        if (currentProductInCart) {
+          // Agar joriy mahsulot cartda bo'lsa
+          setCartId(currentProductInCart.id);
+          setSelectedSize(currentProductInCart.tip);
+          setQuantity(currentProductInCart.count);
+          setShowQuantity(true);
+        } else {
+          // Agar joriy mahsulot cartda bo'lmasa
+          setCartId(null);
+          setSelectedSize(null);
+          setQuantity(0);
+          setShowQuantity(false);
+        }
+      } else {
+        // Cart bo'sh bo'lsa
+        setCartId(null);
+        setSelectedSize(null);
+        setQuantity(0);
+        setShowQuantity(false);
+      }
+    } catch (error) {
+      console.error("Error fetching cart data:", error);
+      // Xatolik bo'lsa ham state'larni tozalash
+      setCartId(null);
+      setSelectedSize(null);
+      setQuantity(0);
+      setShowQuantity(false);
+    }
+  }, [id]);
+
+  // Initialize component
+  useEffect(() => {
+    const initializeComponent = async () => {
+      setLoading(true);
+      setCartLoading(true);
+
+      // Reset all states when navigating to new product
+      resetAllStates();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Fetch product details
+      await fetchProductDetails();
+
+      // Check cart data
+      await checkCartData();
+
+      setLoading(false);
+      setCartLoading(false);
+    };
+
+    initializeComponent();
+  }, [resetAllStates, fetchProductDetails, checkCartData]);
+
+  // Delete item from cart
+  const deleteFromCart = async (cartItemId) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_CARTS}/delete?cart_id=${cartItemId}`
+      );
+      return true;
+    } catch (error) {
+      console.error("Error deleting cart item:", error);
+      return false;
+    }
+  };
+
+  // Update cart in API
+  const updateCartInApi = async (newQuantity, tipId = selectedSize?.id) => {
+    if (!tipId) return false;
+    try {
+      await axios.patch(
+        `${
+          import.meta.env.VITE_CARTS
+        }?cart_id=${cartId}&count=${newQuantity}&tip_id=${tipId}`
+      );
+      return true;
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      return false;
+    }
+  };
+
+  // Update cart
+  const updateCart = async (newQuantity) => {
+    if (newQuantity < 1) {
+      if (cartId) {
+        const success = await deleteFromCart(cartId);
+        if (success) {
+          setShowQuantity(false);
+          setSelectedSize(null);
+          setQuantity(0);
+          setCartId(null);
+          // Cart ma'lumotlarini qayta yuklash
+          await checkCartData();
+        }
+      }
+      return;
+    }
+
+    if (selectedSize) {
+      const success = await updateCartInApi(newQuantity, selectedSize.id);
+      if (success) {
+        setQuantity(newQuantity);
+        // Cart ma'lumotlarini qayta yuklash
+        await checkCartData();
+      }
+    }
+  };
+
+  if (loading || cartLoading) {
     return (
-      <div className="text-center text-lg font-semibold mt-10">
-        {t("loading")}
+      <div className="fixed inset-0 flex items-center justify-center bg-white/80">
+        <Loader className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -59,16 +196,6 @@ function ProductDetails() {
         ? prev.filter((favId) => favId !== product.id)
         : [...prev, product.id]
     );
-  };
-
-  const updateCart = (newQuantity) => {
-    if (newQuantity < 1) {
-      setShowQuantity(false);
-      setSelectedSize(null);
-      setQuantity(0);
-      return;
-    }
-    setQuantity(newQuantity);
   };
 
   const totalPrice = (selectedSize?.price || 0) * quantity;
@@ -124,95 +251,99 @@ function ProductDetails() {
         <h3 className="text-xl text-center font-bold mt-3">
           {t("productSize")}:
         </h3>
-        <div className="mt-2 space-y-2">
-          {product.tips.map((size) => (
-            <label
-              key={size.id}
-              className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition hover:bg-blue-200 hover:border-blue-500 ${
-                selectedSize?.id === size.id ? "bg-blue-100" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="size"
-                  className="w-5 h-5 accent-blue-600"
-                  checked={selectedSize?.id === size.id}
-                  onChange={() => {
-                    setSelectedSize(size);
-                    if (!showQuantity) {
-                      setShowQuantity(false);
-                      setQuantity(0);
-                    }
-                  }}
-                />
-                <span className="text-lg font-medium">
-                  {size.volume} {size.unit}
-                </span>
-              </div>
-              <span className="text-lg font-medium">
-                {size.price.toLocaleString("ru-RU")} {t("UZS")}
-              </span>
-            </label>
-          ))}
-        </div>
 
-        {selectedSize && !showQuantity && (
-          <button
-            onClick={() => {
-              setShowQuantity(true);
-              setQuantity(1);
-            }}
-            className="w-full mt-4 flex items-center justify-center gap-2 p-3 bg-blue-600 text-white rounded-md"
-          >
-            <FaCartPlus className="h-5 w-5" /> {t("add_to_cart")}
-          </button>
-        )}
-
-        {showQuantity && (
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => updateCart(quantity - 1)}
-                className="w-10 h-10 rounded-full border-2 border-red-500 flex items-center justify-center text-red-500 text-xl font-bold transition-all hover:bg-red-500 hover:text-white active:scale-90"
-              >
-                <AiOutlineMinus size={20} />
-              </button>
-              <span className="text-lg font-medium w-6 text-center">
-                {quantity}
-              </span>
-              <button
-                onClick={() => updateCart(quantity + 1)}
-                className="w-10 h-10 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 text-xl font-bold transition-all hover:bg-green-500 hover:text-white active:scale-90"
-              >
-                <AiOutlinePlus size={20} />
-              </button>
+        {cartLoading ? (
+          <div className="text-center py-4">{t("loading")}</div>
+        ) : (
+          <>
+            <div className="mt-2 space-y-2">
+              {product.tips.map((size) => (
+                <label
+                  key={size.id}
+                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition hover:bg-blue-200 hover:border-blue-500 ${
+                    selectedSize?.id === size.id ? "bg-blue-100" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="size"
+                      className="w-5 h-5 accent-blue-600"
+                      checked={selectedSize?.id === size.id}
+                      onChange={async () => {
+                        setSelectedSize(size);
+                        // Agar cartda bo'lsa
+                        if (cartId) {
+                          const success = await updateCartInApi(1, size.id);
+                          if (success) {
+                            setQuantity(1);
+                            setShowQuantity(true);
+                          }
+                        } else {
+                          // Yangi tanlov uchun
+                          setQuantity(1);
+                          setShowQuantity(true);
+                        }
+                      }}
+                    />
+                    <span className="text-lg font-medium">
+                      {size.volume} {size.unit}
+                    </span>
+                  </div>
+                  <span className="text-lg font-medium">
+                    {size.price.toLocaleString("ru-RU")} {t("UZS")}
+                  </span>
+                </label>
+              ))}
             </div>
-            <p className="text-lg font-semibold">
-              {t("price")}: {totalPrice.toLocaleString()} so‘m
-            </p>
-          </div>
+          </>
         )}
+        {selectedSize && (
+          <>
+            {showQuantity && (
+              <>
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => updateCart(quantity - 1)}
+                      className="w-10 h-10 rounded-full bg-white text-red-500 hover:text-red-600 hover:scale-105 transition-transform shadow-md flex items-center justify-center"
+                    >
+                      <AiOutlineMinus size={20} />
+                    </button>
+                    <span className="text-lg font-medium w-6 text-center">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => updateCart(quantity + 1)}
+                      className="w-10 h-10 rounded-full bg-white text-green-500 hover:text-green-600 hover:scale-105 transition-transform shadow-md flex items-center justify-center"
+                    >
+                      <AiOutlinePlus size={20} />
+                    </button>
+                  </div>
+                  <p className="text-lg font-semibold">
+                    {t("price")}: {totalPrice.toLocaleString()} so'm
+                  </p>
+                </div>
 
-        {showQuantity && (
-          <div className="flex gap-4">
-            <Link
-              to={"/cart"}
-              className="w-full mt-4 text-center bg-blue-600 text-white p-3 rounded-md"
-            >
-              {t("addToCart")}
-            </Link>
-            <Link
-              to={"/purchase"}
-              className="w-full mt-4 text-center bg-blue-600 text-white p-3 rounded-md"
-            >
-              {t("purchase")}
-            </Link>
-          </div>
+                <div className="flex gap-4">
+                  <Link
+                    to={"/cart"}
+                    className="w-full mt-4 text-center bg-blue-600 text-white p-3 rounded-md"
+                  >
+                    {t("addToCart")}
+                  </Link>
+                  <Link
+                    to={"/purchase"}
+                    className="w-full mt-4 text-center bg-blue-600 text-white p-3 rounded-md"
+                  >
+                    {t("purchase")}
+                  </Link>
+                </div>
+              </>
+            )}
+          </>
         )}
       </div>
-      <h2 className="text-center font-bold text-xl">{t("allProducts")}</h2>
-      <Product />
     </div>
   );
 }

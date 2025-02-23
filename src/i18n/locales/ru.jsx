@@ -41,6 +41,9 @@ const ru = {
     allProducts: "Все Tовары",
     closed: "Закрыто",
     no_liked_products: "Избранные товары не найдены",
+    search_results: "Результаты поиска",
+    no_results_found: "Товар не найден",
+    notcart: "Вы не добавили товары в корзину",
   },
 };
 
